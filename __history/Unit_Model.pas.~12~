@@ -1,0 +1,54 @@
+unit Unit_Model;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, Data.DB, Data.Win.ADODB;
+
+type
+  TDataModuleDB = class(TDataModule)
+    ADODataSet_komplex: TADODataSet;
+    ADOConnection1: TADOConnection;
+    ADODataSet_werkstatt: TADODataSet;
+    ADODataSet_Cust_personal: TADODataSet;
+    DataSource_werkstatt: TDataSource;
+    DataSource_komplex: TDataSource;
+    ADODataSet_funktion: TADODataSet;
+    DataSource_funktion: TDataSource;
+    ADODataSet_etype: TADODataSet;
+    DataSource_etype: TDataSource;
+    ADODataSet_Cust_einrichtung: TADODataSet;
+    DataSource_Cust_einrichtung: TDataSource;
+    ADODataSet_Cust_ppr: TADODataSet;
+    DataSource_Cust_ppr: TDataSource;
+    ADODataSet_Cust_einrichtung_funktion: TADODataSet;
+    DataSource_Cust_einrichtung_funktion: TDataSource;
+    ADOQuery: TADOQuery;
+    DataSource_Cust_personal: TDataSource;
+    ADODataSet_ppr: TADODataSet;
+    DataSource_ppr: TDataSource;
+    ADODataSet_personal: TADODataSet;
+    DataSource_personal: TDataSource;
+    ADODataSet_einrichtung: TADODataSet;
+    DataSource_einrichtung: TDataSource;
+    ADODataSet_einrichtung_funktion: TADODataSet;
+    DataSource_einrichtung_function: TDataSource;
+    ADODataSet_Share_einrichtung: TADODataSet;
+    DataSource_Share_einrichtung: TDataSource;
+    ADODataSet_Share_einrichtung_funktion: TADODataSet;
+    DataSource_Share_einrichtung_funktion: TDataSource;
+  private
+    { Private declarations }
+  end;
+
+var
+  DataModuleDB: TDataModuleDB;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+
+{$R *.dfm}
+
+end.

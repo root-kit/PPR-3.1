@@ -1,0 +1,121 @@
+unit Unit_Personal;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.DBCtrls, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.Mask, Vcl.Grids, Vcl.ValEdit;
+
+type
+  TForm_Personal = class(TForm)
+    DB_namen1: TDBEdit;
+    DB_namen2: TDBEdit;
+    DB_namen3: TDBEdit;
+    DB_post: TDBEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    GridPanel2: TGridPanel;
+    ListBox_werkstatt_namen: TListBox;
+    GridPanel1: TGridPanel;
+    Button2: TButton;
+    Button4: TButton;
+    DB_id_werkstatt: TDBEdit;
+    procedure Button4Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure ListBox_werkstatt_namenClick(Sender: TObject);
+    procedure FormHide(Sender: TObject);
+    function GetId_Werkstatt(namen: String): String;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form_Personal: TForm_Personal;
+  Insert_Personal: Boolean;
+
+implementation
+
+{$R *.dfm}
+
+uses Unit_Model, Unit_Werkstatt, Unit_Tables, Unit_Main;
+
+procedure TForm_Personal.Button2Click(Sender: TObject);
+begin
+  If ListBox_werkstatt_namen.ItemIndex>-1 then
+    begin
+      If (DB_namen1.Text<>'') and (DB_namen2.Text<>'') and (DB_namen3.Text<>'') and (DB_post.Text<>'') then
+        begin
+          If Insert_Personal then DataModuleDB.ADO_personal.Append else
+            With DataModuleDB do begin
+              ADOQuery1.Close;
+              ADOQuery1.SQL.Clear;
+              ADOQuery1.SQL.Add('INSERT INTO personal(id_werkstatt, namen1, namen2, namen3, post) VALUES (:id_werkstatt, :namen1, :namen2, :namen3, post);');
+              ADOQuery1.Parameters.ParamByName('id_werkstatt').Value :=DB_id_werkstatt.Text;
+              ADOQuery1.Parameters.ParamByName('namen1').Value :=DB_namen1.Text;
+              ADOQuery1.Parameters.ParamByName('namen2').Value :=DB_namen2.Text;
+              ADOQuery1.Parameters.ParamByName('namen3').Value :=DB_namen3.Text;
+              ADOQuery1.Parameters.ParamByName('post').Value :=DB_post.Text;
+              ADOQuery1.ExecSQL;
+            end;
+//          DataModuleDB.ADOQuery_Custom_Personal.Refresh;
+          Form_Personal.Hide;
+        end;
+    end else ShowMessage('Выберите Цех из списка!');
+end;
+
+procedure TForm_Personal.Button4Click(Sender: TObject);
+begin
+  Form_Personal.Hide;
+end;
+
+procedure TForm_Personal.FormHide(Sender: TObject);
+begin
+  if Insert_Personal then DataModuleDB.ADO_personal.Delete;
+  Form_Tables.Show;
+end;
+
+procedure TForm_Personal.FormShow(Sender: TObject);
+Var i: Word;
+begin
+  ListBox_werkstatt_namen.Clear;
+  For i:=1 to Form_Werkstatt.ValueWerkstatt.Strings.Count do
+    ListBox_werkstatt_namen.Items.Add(Form_Werkstatt.ValueWerkstatt.Cells[1,i]);
+  If not Insert_Personal then
+  begin
+    If DataModuleDB.ADO_personal.Locate('id_personal', DataModuleDB.ADOQuery_Custom_Personal.Fields[0].AsString, []) then
+    For i:=0 to ListBox_werkstatt_namen.Items.Count-1 do begin
+      If ListBox_werkstatt_namen.Items[i] = DataModuleDB.ADOQuery_Custom_Personal.FieldByName('namen').AsString then
+      begin
+        ListBox_werkstatt_namen.ItemIndex :=ListBox_werkstatt_namen.Count-1;
+        DB_id_werkstatt.Text :=GetId_Werkstatt(ListBox_werkstatt_namen.Items[ListBox_werkstatt_namen.ItemIndex]);
+        Break;
+      end;
+    end
+  end else ListBox_werkstatt_namen.ItemIndex :=-1;
+end;
+
+function TForm_Personal.GetId_Werkstatt(namen: string): String;
+Var i: Integer;
+begin
+    For i:=1 to Form_Werkstatt.ValueWerkstatt.Strings.Count do
+      If namen=Form_Werkstatt.ValueWerkstatt.Cells[1,i] then
+        begin
+          Result :=Form_Werkstatt.ValueWerkstatt.Cells[0,i];
+          Break;
+        end;
+end;
+
+procedure TForm_Personal.ListBox_werkstatt_namenClick(Sender: TObject);
+begin
+  If ListBox_werkstatt_namen.ItemIndex>-1 then
+    DB_id_werkstatt.Text :=GetId_Werkstatt(ListBox_werkstatt_namen.Items[ListBox_werkstatt_namen.ItemIndex]);
+end;
+
+end.

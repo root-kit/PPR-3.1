@@ -1,0 +1,23 @@
+program PPR;
+
+uses
+  Vcl.Forms,
+  Unit_Main in 'Unit_Main.pas' {Form_Main},
+  Unit_Tables in 'Unit_Tables.pas' {Form_Tables},
+  Unit_Model in 'Unit_Model.pas' {DataModuleDB: TDataModule},
+  Vcl.Themes,
+  Vcl.Styles,
+  Unit_Personal in 'Unit_Personal.pas' {Form_Personal};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  TStyleManager.TrySetStyle('Emerald Light Slate');
+  Application.CreateForm(TDataModuleDB, DataModuleDB);
+  Application.CreateForm(TForm_Main, Form_Main);
+  Application.CreateForm(TForm_Tables, Form_Tables);
+  Application.CreateForm(TForm_Personal, Form_Personal);
+  Application.Run;
+end.

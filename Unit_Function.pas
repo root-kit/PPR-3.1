@@ -1,0 +1,71 @@
+unit Unit_function;
+
+interface
+
+Uses System.Classes;
+
+Type
+  TKeyVal = record
+    Keys,Vals : TStrings;
+    function GetIdPerKey(Key: String) : Integer;
+    function GetValPerKey(Key: String) : String;
+    function GetKeyPerVal(Val: String) : String;
+    procedure CreateKV;
+  end;
+
+function GetIdInList(SList : TStrings; S: String) : Integer;
+
+implementation
+
+function GetIdInList(SList : TStrings; S: String) : Integer;
+Var i: Integer;
+begin
+  Result :=-1;
+  For i:=0 to SList.Count-1 do If S=SList[i] then
+    begin
+      Result :=i;
+      Break;
+    end;
+
+end;
+
+procedure TKeyVal.CreateKV;
+begin
+  Keys :=TStringList.Create;
+  Vals :=TStringList.Create;
+end;
+
+function TKeyVal.GetIdPerKey(Key: string) : Integer;
+Var i: Integer;
+begin
+  Result :=-1;
+  For i:=0 to Keys.Count-1 do If Key=Keys[i] then
+    begin
+      Result :=i;
+      Break;
+    end;
+end;
+
+function TKeyVal.GetValPerKey(Key: string) : String;
+Var i: Integer;
+begin
+  Result :='';
+  For i:=0 to Keys.Count-1 do If Key=Keys[i] then
+    begin
+      Result :=Vals[i];
+      Break;
+    end;
+end;
+
+function TKeyVal.GetKeyPerVal(Val: string) : String;
+Var i: Integer;
+begin
+  Result :='';
+  For i:=0 to Keys.Count-1 do If Val=Vals[i] then
+    begin
+      Result :=Keys[i];
+      Break;
+    end;
+end;
+
+end.

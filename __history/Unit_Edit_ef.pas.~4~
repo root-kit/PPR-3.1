@@ -1,0 +1,245 @@
+unit Unit_Edit_ef;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.DBGrids, Vcl.StdCtrls,
+  Vcl.ExtCtrls, Vcl.DBCtrls, Vcl.ComCtrls;
+
+type
+  TForm_Edit_ef = class(TForm)
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    GridPanel1: TGridPanel;
+    Label1: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    SelectID_ef: TLabel;
+    ComboBox_period: TComboBox;
+    Label11: TLabel;
+    Memo_briefing: TMemo;
+    TabSheet3: TTabSheet;
+    GridPanel3: TGridPanel;
+    DBNavigator2: TDBNavigator;
+    Label15: TLabel;
+    EditSearch_einrihtung: TEdit;
+    Label16: TLabel;
+    SelectID_einrichtung: TLabel;
+    Panel1: TPanel;
+    Button_Apply: TButton;
+    Button_Cancel: TButton;
+    Grid_einrihtung: TDBGrid;
+    TabSheet4: TTabSheet;
+    GridPanel4: TGridPanel;
+    DBNavigator3: TDBNavigator;
+    Label2: TLabel;
+    EditSearch_funktion: TEdit;
+    Label6: TLabel;
+    SelectID_funktion: TLabel;
+    Label8: TLabel;
+    Edit_typen: TEdit;
+    Label9: TLabel;
+    Edit_link: TEdit;
+    Label10: TLabel;
+    Edit_mittel: TEdit;
+    Label12: TLabel;
+    Edit_redel: TEdit;
+    Edit_huftung: TEdit;
+    Grid_funktion: TDBGrid;
+    procedure Button_ApplyClick(Sender: TObject);
+    procedure EditSearch_einrihtungChange(Sender: TObject);
+    procedure Grid_funktionCellClick(Column: TColumn);
+    procedure Grid_funktionKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure Grid_funktionMouseWheelDown(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    procedure Grid_einrihtungCellClick(Column: TColumn);
+    procedure Grid_einrihtungMouseWheelDown(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    procedure Grid_einrihtungKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form_Edit_ef: TForm_Edit_ef;
+
+implementation
+
+{$R *.dfm}
+
+uses Unit_Model, Unit_Tables;
+
+procedure TForm_Edit_ef.Button_ApplyClick(Sender: TObject);
+begin
+//id_ef   id_einrichtung   id_funktion   period   haftung   typen   link   mittel   briefing
+end;
+
+procedure TForm_Edit_ef.EditSearch_einrihtungChange(Sender: TObject);
+Var h2 : String;
+begin
+  h2 :=QuotedStr('%'+EditSearch_einrihtung.Text+'%');
+  With DataModuleDB do
+    begin
+      ADODataSet_Share_einrichtung.Close;
+      ADODataSet_Share_einrichtung.CommandText :='SELECT einrichtung.id_einrichtung,werkstatt.namen,etype.namen,komplex.namen,'+
+                                  'einrichtung.klasse,einrichtung.namen,einrichtung.model,einrichtung.serien_nummer,'+
+                                  'einrichtung.einzig_nummer,einrichtung.briefing,einrichtung.photo '+
+                                  'FROM einrichtung '+
+                                  'LEFT OUTER JOIN werkstatt ON einrichtung.id_werkstatt = werkstatt.id_werkstatt '+
+                                  'LEFT OUTER JOIN etype ON einrichtung.id_etype = etype.id_etype '+
+                                  'LEFT OUTER JOIN komplex ON einrichtung.id_komplex = komplex.id_komplex '+
+                                  'WHERE werkstatt.namen ILIKE '+h2+' OR '+
+                                  'etype.namen ILIKE '+h2+' OR '+
+                                  'komplex.namen ILIKE '+h2+' OR '+
+                                  'einrichtung.namen ILIKE '+h2+' OR '+
+                                  'einrichtung.model ILIKE '+h2+' OR '+
+                                  'einrichtung.serien_nummer ILIKE '+h2+' OR '+
+                                  'einrichtung.einzig_nummer ILIKE '+h2+' OR '+
+                                  'einrichtung.briefing ILIKE '+h2+' OR '+
+                                  'einrichtung.photo ILIKE '+h2+' '+
+                                  'ORDER BY einrichtung.namen ASC;';
+      ADODataSet_Share_einrichtung.Open;
+    end;
+end;
+
+procedure TForm_Edit_ef.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  Form_Tables.Enabled :=True;
+  CanClose :=False;
+  Form_Edit_ef.Hide;
+end;
+
+procedure TForm_Edit_ef.FormShow(Sender: TObject);
+Var h2 : String;
+    i : Word;
+    DT : TDateTime;
+begin
+  Caption :=CaptionEdit_ppr;
+  With DataModuleDB.ADOQuery do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT id_funktion,namen FROM funktion ORDER BY id_funktion;');
+      Open;
+      ComboBox_funk_namen.Items.Clear;
+      For i :=0 to RecordCount-1 do
+        begin
+          KV_funktion.Vals.Add(FieldByName('namen').AsString);
+          KV_funktion.Keys.Add(FieldByName('id_funktion').AsString);
+          ComboBox_funk_namen.Items.Add(KV_funktion.Vals[i]);
+          next;
+        end;
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT id_personal,namen1 FROM personal ORDER BY id_personal;');
+      Open;
+      ComboBox_person_namen.Items.Clear;
+      For i :=0 to RecordCount-1 do
+        begin
+          KV_personal.Vals.Add(FieldByName('namen1').AsString);
+          KV_personal.Keys.Add(FieldByName('id_personal').AsString);
+          ComboBox_person_namen.Items.Add(KV_personal.Vals[i]);
+          next;
+        end;
+    end;
+
+  If Caption='Изменение в Таблице ППР' then
+    begin
+      h2 :=QuotedStr(Form_Tables.Grid_ppr.DataSource.DataSet.FieldByName('id_ppr').AsString);
+      With DataModuleDB.ADOQuery do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT ppr.id_ppr,werkstatt.id_werkstatt,einrichtung.id_einrichtung, '+
+                    'funktion.id_funktion,einrichtung_funktion.id_ef,personal.id_personal '+
+                    'FROM ppr '+
+                    'INNER JOIN einrichtung_funktion ON ppr.id_ef = einrichtung_funktion.id_ef '+
+                    'INNER JOIN personal ON ppr.id_personal = personal.id_personal '+
+                    'INNER JOIN einrichtung ON einrichtung_funktion.id_einrichtung = einrichtung.id_einrichtung '+
+                    'INNER JOIN werkstatt ON einrichtung.id_werkstatt = werkstatt.id_werkstatt '+
+                    'INNER JOIN funktion ON einrichtung_funktion.id_funktion = funktion.id_funktion '+
+                    'WHERE id_ppr='+h2+';');
+          Open;
+          Data_ppr.Clear;
+          For i :=0 to FieldCount-1 do Data_ppr.Add(Fields[i].AsString);
+          ComboBox_funk_namen.ItemIndex :=KV_funktion.GetIdPerKey(Data_ppr[3]);
+          ComboBox_person_namen.ItemIndex :=KV_personal.GetIdPerKey(Data_ppr[5]);
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT id_ppr, date_erstellung, date_anderung, date_end, betriebszeit, '+
+                    'laufzeit, briefing, status FROM ppr WHERE id_ppr='+h2+' ORDER BY id_ppr;');
+          Open;
+          DT :=FieldByName('date_erstellung').AsDateTime;
+          Date_erst.DateTime :=DT;  Time_erst.Time :=DT;
+          DT :=FieldByName('date_end').AsDateTime;
+          Date_end.DateTime :=DT;  Time_end.Time :=DT;
+          ComboBox_status.ItemIndex :=GetIdInList(ComboBox_status.Items, FieldByName('status').AsString);
+          Edit_betriebszeit.Text :=FieldByName('betriebszeit').AsString;
+          Edit_laufzeit.Text :=FieldByName('laufzeit').AsString;
+          Memo_briefing.Lines.Text :=FieldByName('briefing').AsString;
+        end;
+
+        Grid_einrichtung.DataSource.DataSet.First;
+        For i:=0 to Grid_einrichtung.DataSource.DataSet.RecordCount-1 do
+          If Data_ppr[2]=Grid_einrichtung.DataSource.DataSet.FieldByName('id_einrichtung').AsString then
+            Break else Grid_einrichtung.DataSource.DataSet.Next;
+        SelectID_einrichtung.Caption :=Grid_einrichtung.DataSource.DataSet.FieldByName('id_einrichtung').AsString;
+
+        Grid_einrichtung_funktion.DataSource.DataSet.First;
+        For i:=0 to Grid_einrichtung_funktion.DataSource.DataSet.RecordCount-1 do
+          If Data_ppr[4]=Grid_einrichtung_funktion.DataSource.DataSet.FieldByName('id_ef').AsString then
+            Break else Grid_einrichtung_funktion.DataSource.DataSet.Next;
+        SelectID_einrichtung_funktion.Caption :=Grid_einrichtung_funktion.DataSource.DataSet.FieldByName('id_ef').AsString;
+        SelectID_ppr.Caption :=Data_ppr[0];
+    end else
+    begin
+
+    end;
+end;
+
+procedure TForm_Edit_ef.Grid_einrihtungCellClick(Column: TColumn);
+begin
+  SelectID_einrichtung.Caption :=Grid_einrihtung.DataSource.DataSet.FieldByName('id_ef').AsString;
+end;
+
+procedure TForm_Edit_ef.Grid_einrihtungKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  Case Key of
+    9,33,34,38,40 : SelectID_einrichtung.Caption :=Grid_einrihtung.DataSource.DataSet.FieldByName('id_ef').AsString;
+  End;
+end;
+
+procedure TForm_Edit_ef.Grid_einrihtungMouseWheelDown(Sender: TObject;
+  Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+  SelectID_einrichtung.Caption :=Grid_einrihtung.DataSource.DataSet.FieldByName('id_ef').AsString;
+end;
+
+procedure TForm_Edit_ef.Grid_funktionCellClick(Column: TColumn);
+begin
+  SelectID_funktion.Caption :=Grid_funktion.DataSource.DataSet.FieldByName('id_ef').AsString;
+end;
+
+procedure TForm_Edit_ef.Grid_funktionKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  Case Key of
+    9,33,34,38,40 : SelectID_funktion.Caption :=Grid_funktion.DataSource.DataSet.FieldByName('id_ef').AsString;
+  End;
+end;
+
+procedure TForm_Edit_ef.Grid_funktionMouseWheelDown(Sender: TObject;
+  Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+  SelectID_funktion.Caption :=Grid_funktion.DataSource.DataSet.FieldByName('id_ef').AsString;
+end;
+
+end.
